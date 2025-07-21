@@ -1,7 +1,18 @@
+# 필수 코어 패키지
 streamlit==1.47.0
-pandas==2.2.2
-numpy==2.0.1
+pandas==2.2.1
+numpy==1.26.4
 matplotlib==3.9.2
-openpyxl==3.1.5  # pandas로 엑셀 파일 읽기 위해 필요
-plotly==6.2.0
-streamlit-lottie==0.0.5  # Lottie 애니메이션 사용 
+
+# 엑셀 처리
+openpyxl==3.1.5
+
+# 시각화 (실제 사용하는 라이브러리만 선택)
+plotly==6.2.0  # 인터랙티브 차트 사용시
+altair==5.5.0  # 간단한 시각화 사용시
+
+# Lottie 애니메이션 (Yay Jump.json 사용시 필수)
+streamlit-lottie==0.0.5
+
+# 기타 유틸리티
+protobuf==3.20.3  # pandas 호환 버전
