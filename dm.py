@@ -26,7 +26,7 @@ try:
     # findSystemFonts()로 찾은 목록에서 선택할 수 있습니다.
     # 정확한 폰트 이름은 시스템에 따라 다를 수 있습니다.
     font_name = 'NanumGothic' # 또는 'NanumGothicOTF' 등 실제 설치된 폰트 이름
-    fm.fontManager.addfont('/usr/share/fonts/truetype/nanum/NanumGothic.ttf') # 직접 폰트 파일 경로 추가 (시스템 폰트)
+    fm.fontManager.addfont('font/NanumGothic.ttf') # 직접 폰트 파일 경로 추가 (시스템 폰트)
     plt.rcParams['font.family'] = font_name
     plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
     st.write(f"폰트 설정 완료: {font_name}") # 디버깅용 메시지
