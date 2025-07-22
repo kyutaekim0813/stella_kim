@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import json
 import platform
 import matplotlib.font_manager as fm
-
+import matplotlib
 
 #matplotlib.rcParams['font.family'] = 'Malgun Gothic'
 #matplotlib.rcParams['axes.unicode_minus']  = False # 한글 폰트 사용시, 마이너스 글자가 깨지는 현상 방지 
