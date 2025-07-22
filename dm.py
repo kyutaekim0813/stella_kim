@@ -13,7 +13,7 @@ import platform
 #matplotlib.rcParams['axes.unicode_minus']  = False # 한글 폰트 사용시, 마이너스 글자가 깨지는 현상 방지 
 
 plt.rcParams['axes.unicode_minus'] = False
-plt.rc('font', family='Malgun Gothic')
+plt.rc('font', family='NanumGothic')
 
 
 
