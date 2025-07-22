@@ -17,7 +17,7 @@ import matplotlib.font_manager as fm
 #plt.rcParams['axes.unicode_minus'] = False
 #plt.rc('font', family='Malgun Gothic')
 
-font_path = r"font\malgun.ttf"
+font_path = r"font/malgun.ttf"
 font_name = fm.FontProperties(fname=font_path).get_name()
 plt.rc('font',family=font_name)
 
