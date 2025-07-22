@@ -11,10 +11,39 @@ import platform
 import matplotlib.font_manager as fm
 import matplotlib
 
-font_path = r"font/NanumGothic.ttf"
-font_name = fm.FontProperties(fname=font_path).get_name()
-plt.rc('font',family=font_name)
-fm._load_fontmanager(try_read_cache=False)
+#font_path = r"font/NanumGothic.ttf"
+#font_name = fm.FontProperties(fname=font_path).get_name()
+#plt.rc('font',family=font_name)
+
+# 폰트 설정
+# Streamlit Cloud 환경에서 apt.txt 또는 packages.txt를 통해 나눔 폰트를 설치했다고 가정
+# 설치된 폰트를 찾아서 사용합니다.
+try:
+    # 나눔고딕 폰트 경로를 자동으로 찾습니다.
+    # 실제 시스템에 설치된 폰트 이름은 'NanumGothic'일 수도 있고,
+    # 'NanumGothicOTF'일 수도 있습니다.
+    # 먼저 일반적인 'NanumGothic'을 시도하고, 없으면 다른 이름을 시도하거나,
+    # findSystemFonts()로 찾은 목록에서 선택할 수 있습니다.
+    # 정확한 폰트 이름은 시스템에 따라 다를 수 있습니다.
+    font_name = 'NanumGothic' # 또는 'NanumGothicOTF' 등 실제 설치된 폰트 이름
+    fm.fontManager.addfont('/usr/share/fonts/truetype/nanum/NanumGothic.ttf') # 직접 폰트 파일 경로 추가 (시스템 폰트)
+    plt.rcParams['font.family'] = font_name
+    plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
+    st.write(f"폰트 설정 완료: {font_name}") # 디버깅용 메시지
+
+except Exception as e:
+    st.warning(f"한글 폰트 설정 중 오류 발생: {e}. 기본 폰트를 사용합니다. (배포 환경 폰트 설치 확인 필요)")
+    # Fallback for local testing or if font not found in cloud
+    if platform.system() == 'Windows':
+        plt.rc('font', family='Malgun Gothic') # 윈도우 기본 한글 폰트
+    elif platform.system() == 'Darwin': # Mac
+        plt.rc('font', family='AppleGothic')
+    else: # Linux (대부분의 클라우드 환경)
+        # 나눔고딕이 설치되어 있지 않다면 깨질 수 있음.
+        # 이 경우 apt.txt 또는 packages.txt로 폰트 설치가 필수.
+        plt.rc('font', family='DejaVu Sans') # 기본 영문 폰트, 한글 깨짐 발생
+    plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
+
 
 
 # ERP_data를 불러오는 함수 
