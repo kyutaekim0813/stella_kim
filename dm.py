@@ -11,10 +11,10 @@ import platform
 import matplotlib.font_manager as fm
 import matplotlib
 
-fm._load_fontmanager(try_read_cache=False)
 font_path = r"font/NanumGothic.ttf"
 font_name = fm.FontProperties(fname=font_path).get_name()
 plt.rc('font',family=font_name)
+fm._load_fontmanager(try_read_cache=False)
 
 
 # ERP_data를 불러오는 함수 
