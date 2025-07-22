@@ -20,7 +20,8 @@ import matplotlib
 font_path = r"font/NanumGothic.ttf"
 font_name = fm.FontProperties(fname=font_path).get_name()
 plt.rc('font',family=font_name)
-fm.fontManager.rebuild()
+
+#matplotlib.font_manager._get_fontconfig_fonts.cache_clear()
 
 # ERP_data를 불러오는 함수 
 @st.cache_data
