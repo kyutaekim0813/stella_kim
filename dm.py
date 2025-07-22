@@ -11,17 +11,11 @@ import platform
 import matplotlib.font_manager as fm
 import matplotlib
 
-#matplotlib.rcParams['font.family'] = 'Malgun Gothic'
-#matplotlib.rcParams['axes.unicode_minus']  = False # 한글 폰트 사용시, 마이너스 글자가 깨지는 현상 방지 
-
-#plt.rcParams['axes.unicode_minus'] = False
-#plt.rc('font', family='Malgun Gothic')
-
+fm._load_fontmanager(try_read_cache=False)
 font_path = r"font/NanumGothic.ttf"
 font_name = fm.FontProperties(fname=font_path).get_name()
 plt.rc('font',family=font_name)
 
-#matplotlib.font_manager._get_fontconfig_fonts.cache_clear()
 
 # ERP_data를 불러오는 함수 
 @st.cache_data
