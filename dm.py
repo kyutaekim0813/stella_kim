@@ -10,6 +10,22 @@ import json
 import platform
 import matplotlib.font_manager as fm
 import matplotlib
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score 
+from sklearn.linear_model import LinearRegression
+from sklearn.impute import SimpleImputer   #결측치 처리
+from sklearn.preprocessing import StandardScaler  #표준화 (평균0,표준편차1)
+from sklearn.pipeline import Pipeline  # 파이프라인 구성
+from sklearn.model_selection import GridSearchCV   # 교차검증
+from sklearn.metrics import r2_score  # 평가방법
+from sklearn.linear_model import LinearRegression
+from sklearn.impute import SimpleImputer   #결측치 처리
+from sklearn.preprocessing import StandardScaler  #표준화 (평균0,표준편차1)
+from sklearn.pipeline import Pipeline  # 파이프라인 구성
+from sklearn.model_selection import GridSearchCV   # 교차검증
+from sklearn.metrics import r2_score  # 평가방법
+
 
 #font_path = r"font/NanumGothic.ttf"
 #font_name = fm.FontProperties(fname=font_path).get_name()
