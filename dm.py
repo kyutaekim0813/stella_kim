@@ -69,7 +69,7 @@ if 'material_code' not in st.session_state:
         st.stop()
 
 # 데이터 프레임 필터링 (세션 상태 초기화 후 수행)
-filtered_df = df[df['자재 코드'] == st.session_state['material_code']].copy()
+filtered_df = df[df['자재 코드'] == st.session_state['material_code']].copy().reset_index(drop=True)
 
 # 데이터 프레임 전처리 (세션 상태 초기화 후 수행 )
 filtered_df['생산일자'] = filtered_df['생산일자'].astype('str')
@@ -120,7 +120,7 @@ with st.sidebar.form(key='chartsetting', clear_on_submit=True):
 
 
 # 데이터 프레임 출력 (앞 5행)
-st.dataframe(filtered_df.head())
+st.dataframe(filtered_df[['생산일자','자재 코드','작업자','최소외경','외경검출기 실제']].head())
 
 # 차트그리는 함수
 if not filtered_df.empty:
@@ -135,13 +135,66 @@ if not filtered_df.empty:
     ax.set_xlabel('생산일자')
     ax.set_ylabel('외경검출기 실제')   
     ax.grid()
-    ax.legend()
+    ax.text( x=filtered_df['생산일자'].min(), y= y_hline+0.05 , s= f'최소외경:{y_hline}', color='r' ) # x좌표를 데이터 시작점으로
+    ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
     st.pyplot(fig)
 
 else:
     st.warning('선택된 자재코드에 해당하는 데이터가 없습니다.')
 
-# st.divider()
+st.divider()
+st.subheader('2. 선형회귀모델 회귀계수 및 절편값 확인')
+
+df_clean = df[['MCYL1', 'MCYL2', 'MCYL3', 'MCYL4', 'MCYL5', 'MNECK', 'MHEAD', 
+                             'MDIE','P/O 저선기 텐션', 'T/U 저선기 텐션','다이','외경검출기 실제']].dropna()
+
+for col_name in df_clean.columns.tolist():
+    df_clean[col_name] = pd.to_numeric(df_clean[col_name], errors='coerce')
+
+df_clean.dropna(inplace=True)
+
+#st.dataframe(df_clean.head())
+
+X = df_clean[['MCYL1', 'MCYL2','MCYL3', 'MCYL4', 'MCYL5', 'MNECK', 'MHEAD', 'MDIE','P/O 저선기 텐션', 'T/U 저선기 텐션','다이']]
+Y = df_clean['외경검출기 실제']
+
+X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size=0.3)
+
+pipe_list = [('impute', SimpleImputer()),
+             ('scaler', StandardScaler()),
+             ('model', LinearRegression())]
+
+model_pipe = Pipeline(pipe_list)
+hyper_parameter = {}
+grid_model = GridSearchCV(model_pipe, param_grid = hyper_parameter, cv=3)
+
+grid_model.fit(X_train, Y_train)
+best_model = grid_model.best_estimator_
+
+Y_train_pred = best_model.predict(X_train)
+Y_test_pred =  best_model.predict(X_test)
+
+st.write("Train r2 Score: " , round(r2_score(Y_train,Y_train_pred),3))
+st.write("Test r2 Score: " , round(r2_score(Y_test,Y_test_pred),3))
+
+# 회귀계수 확인 
+#best_model['model'].coef_
+df2 = pd.DataFrame(best_model['model'].coef_, index=X.columns, columns=['회귀계수'])
+st.dataframe(df2)
+
+# 절편 확인 
+st.write("절편값:" , round(best_model['model'].intercept_,3))
+
+
+
+st.divider()
+st.subheader('3. Target에 대한 최적파라미터값 도출')
+
+
+
+
+
+
 # st.subheader('2. 선형회귀모델로 회귀계수 및 절편 도출')
 
 # st.divider()
