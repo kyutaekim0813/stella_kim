@@ -33,6 +33,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy.optimize import minimize
 
+
+
+# 절대 지우지 말것 (비쥬얼 스튜디오 즉, 로컬 PC에서 작성한 코드랑 다르다) 
 # 폰트 설정
 # Streamlit Cloud 환경에서 apt.txt 또는 packages.txt를 통해 나눔 폰트를 설치했다고 가정
 # 설치된 폰트를 찾아서 사용합니다.
@@ -49,7 +52,6 @@ try:
     plt.rcParams['axes.unicode_minus'] = False # 마이너스 기호 깨짐 방지
     st.write(f"폰트 설정 완료: {font_name}") # 디버깅용 메시지
 
-# 절대 지우지 말것 (비쥬얼 스튜디오 즉, 로컬 PC에서 작성한 코드랑 다르다) 
 except Exception as e:
     st.warning(f"한글 폰트 설정 중 오류 발생: {e}. 기본 폰트를 사용합니다. (배포 환경 폰트 설치 확인 필요)")
     # Fallback for local testing or if font not found in cloud
