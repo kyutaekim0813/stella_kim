@@ -24,7 +24,11 @@ from sklearn.impute import SimpleImputer   #결측치 처리
 from sklearn.preprocessing import StandardScaler  #표준화 (평균0,표준편차1)
 from sklearn.pipeline import Pipeline  # 파이프라인 구성
 from sklearn.model_selection import GridSearchCV   # 교차검증
-from sklearn.metrics import r2_score  # 평가방법
+from sklearn.metrics import r2_score  # 평가지표  - 값이 1에 가까울 수록 좋다. 
+from sklearn.metrics import mean_squared_error  # 평가지표 - 값이 0에 가까울 수록 좋다 (왜냐하면 규제를 하는 모델이기때문임/ 오버피팅 방지)
+from sklearn.linear_model import Lasso
+from sklearn.linear_model import Ridge  
+from sklearn.linear_model import ElasticNet
 
 
 #font_path = r"font/NanumGothic.ttf"
@@ -84,6 +88,9 @@ if 'material_code' not in st.session_state:
         st.error('유효한 자재가 없습니다.')
         st.stop()
 
+if 'regression_value' not in st.session_state:
+    st.session_state['regression_value'] = '선형회귀'  # 기본값 설정
+
 # 데이터 프레임 필터링 (세션 상태 초기화 후 수행)
 filtered_df = df[df['자재 코드'] == st.session_state['material_code']].copy().reset_index(drop=True)
 
@@ -133,6 +140,16 @@ with st.sidebar.form(key='chartsetting', clear_on_submit=True):
         st.session_state['material_code'] = selected_code
         st.rerun()
 
+''
+''
+''
+with st.sidebar:
+    st.markdown('회귀모델을 선택해주세요: :sunglasses:')
+    regression_value = st.radio(label = '', options = ['선형회귀', 'LASSO','RIDGE','ELASTIC'])
+    st.write('회귀모델', regression_value, '을 선택하셨습니다.')
+    
+    # 세션 상태 업데이트
+    st.session_state['regression_value'] = regression_value
 
 
 # 데이터 프레임 출력 (앞 5행)
@@ -169,16 +186,25 @@ for col_name in df_clean.columns.tolist():
 
 df_clean.dropna(inplace=True)
 
-#st.dataframe(df_clean.head())
-
 X = df_clean[['MCYL1', 'MCYL2','MCYL3', 'MCYL4', 'MCYL5', 'MNECK', 'MHEAD', 'MDIE','P/O 저선기 텐션', 'T/U 저선기 텐션','다이']]
 Y = df_clean['외경검출기 실제']
 
-X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size=0.3)
+X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size=0.3,random_state=3174)
+
+# 선택된 모델에 따라 모델 인스턴스 생성
+model_instance = None
+if st.session_state['regression_value'] == '선형회귀':
+    model_instance = LinearRegression()
+elif st.session_state['regression_value'] == 'LASSO':
+    model_instance = Lasso(random_state=3174)
+elif st.session_state['regression_value'] == 'RIDGE':
+    model_instance = Ridge(random_state=3174)
+elif st.session_state['regression_value'] == 'ELASTIC':
+    model_instance = ElasticNet(random_state=3174)        
 
 pipe_list = [('impute', SimpleImputer()),
              ('scaler', StandardScaler()),
-             ('model', LinearRegression())]
+             ('model', model_instance)]
 
 model_pipe = Pipeline(pipe_list)
 hyper_parameter = {}
@@ -190,8 +216,19 @@ best_model = grid_model.best_estimator_
 Y_train_pred = best_model.predict(X_train)
 Y_test_pred =  best_model.predict(X_test)
 
-st.write("Train r2 Score: " , round(r2_score(Y_train,Y_train_pred),3))
-st.write("Test r2 Score: " , round(r2_score(Y_test,Y_test_pred),3))
+# 평가지표
+if st.session_state['regression_value'] == '선형회귀':
+    st.write("Train r2 Score: " , round(r2_score(Y_train,Y_train_pred),3))
+    st.write("Test r2 Score: " , round(r2_score(Y_test,Y_test_pred),3))
+elif st.session_state['regression_value'] == 'LASSO':
+    st.write("Train r2 Score: " , round(mean_squared_error(Y_train,Y_train_pred),3))
+    st.write("Test r2 Score: " , round(mean_squared_error(Y_test,Y_test_pred),3))
+elif st.session_state['regression_value'] == 'RIDGE':
+    st.write("Train r2 Score: " , round(mean_squared_error(Y_train,Y_train_pred),3))
+    st.write("Test r2 Score: " , round(mean_squared_error(Y_test,Y_test_pred),3))
+elif st.session_state['regression_value'] == 'ELASTIC':
+    st.write("Train r2 Score: " , round(mean_squared_error(Y_train,Y_train_pred),3))
+    st.write("Test r2 Score: " , round(mean_squared_error(Y_test,Y_test_pred),3))        
 
 # 회귀계수 확인 
 #best_model['model'].coef_
@@ -201,17 +238,5 @@ st.dataframe(df2)
 # 절편 확인 
 st.write("절편값:" , round(best_model['model'].intercept_,3))
 
-
-
 st.divider()
 st.subheader('3. Target에 대한 최적파라미터값 도출')
-
-
-
-
-
-
-# st.subheader('2. 선형회귀모델로 회귀계수 및 절편 도출')
-
-# st.divider()
-# st.subheader('3. Target에 대한 최적파라미터값 도출')
