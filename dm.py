@@ -32,6 +32,7 @@ from sklearn.linear_model import ElasticNet
 import plotly.express as px
 import plotly.graph_objects as go
 from scipy.optimize import minimize
+from PIL import Image
 
 
 
@@ -125,6 +126,7 @@ with col2:
     st.subheader('1. 자재코드별 작업자 외경 치수 비교')
 
 
+
 # 사이드바에서 폼을 통해서 인자를 생성한다. 
 with st.sidebar.form(key='chartsetting', clear_on_submit=True):
     st.markdown('조회할 자재코드를 선택해주세요: :tulip:')
@@ -138,8 +140,6 @@ with st.sidebar.form(key='chartsetting', clear_on_submit=True):
     selected_code =  st.selectbox(' ',options = material_code_list, index= current_index)
     ''
     ''
-    ''
-    ''
     if st.form_submit_button(label='확인'):
         st.session_state['material_code'] = selected_code
         st.rerun()
@@ -148,12 +148,17 @@ with st.sidebar.form(key='chartsetting', clear_on_submit=True):
 ''
 ''
 with st.sidebar:
-    st.markdown('회귀모델을 선택해주세요: :sunglasses:')
-    regression_value = st.radio(label = '', options = ['선형회귀', 'LASSO','RIDGE','ELASTIC'])
-    st.write('회귀모델', regression_value, '을 선택하셨습니다.')
+    #st.markdown('회귀모델을 선택해주세요: :sunglasses:')
+    regression_value = st.radio(label = '회귀모델을 선택해주세요: :sunglasses:', options = ['Default', 'LASSO','RIDGE','ELASTIC'])
+    st.write('회귀 모델 <', regression_value, '>을 선택하셨습니다.')
     
     # 세션 상태 업데이트
     st.session_state['regression_value'] = regression_value
+    ''
+    # 이미지 삽입
+    img = Image.open('smile.PNG')
+    st.image(img, width=300, caption='A day without laughter is a day wasted')
+
 
 
  
@@ -224,7 +229,7 @@ fig_go.add_annotation(
 # 레이아웃 설정 (제목, 축 라벨, 그리드, 범례, x축 글자 회전)
 fig_go.update_layout(
     title={
-        'text': f"{st.session_state['material_code']} 의 자재 및 작업자별 외경 사이즈 비교",
+        'text': f" 자재명: {st.session_state['material_code']} 의 작업자별 외경치수 ",
         'x': 0.5, # 제목 중앙 정렬
         'xanchor': 'center'
     },
@@ -241,7 +246,7 @@ fig_go.update_layout(
     ),
     margin=dict(r=150), # 범례가 들어갈 오른쪽 여백 확보
     height=500, # 그래프 높이 설정
-    width=1200,  # 그래프 너비 설정
+    width=700,  # 그래프 너비 설정
     xaxis=dict(showgrid=True), # x축 그리드 표시
     yaxis=dict(showgrid=True)  # y축 그리드 표시
 )
@@ -249,9 +254,19 @@ fig_go.update_layout(
 # Streamlit에 Plotly 그래프 표시
 st.plotly_chart(fig_go, use_container_width=True) # use_container_width=True로 컨테이너 너비에 맞춤
 
+st.info("※ 참고: ERP 데이터 기반으로, 입력된 값이 오류가 있다면 그래프가 이상하게 나타날 수 도 있습니다. ")
 
 st.divider()
-st.subheader('2. 선형회귀모델 회귀계수 및 절편값 확인')
+
+# 로고 Lottie와 타이틀 출력.
+col1, col2 = st.columns([1,3])
+with col1:
+    lottie = loadJSON('Cute Bird Flapping Animation.json')
+    st_lottie(lottie, speed=1, loop=True, width=150, height=150)
+with col2:
+    ''
+    ''
+    st.subheader('2. 선형 회귀모델 회귀계수 및 절편 도출')
 
 df_clean = df[['MCYL1', 'MCYL2', 'MCYL3', 'MCYL4', 'MCYL5', 'MNECK', 'MHEAD', 
                              'MDIE','P/O 저선기 텐션', 'T/U 저선기 텐션','다이','외경검출기 실제']].dropna()
@@ -269,7 +284,7 @@ X_train, X_test, Y_train, Y_test = train_test_split( X, Y, test_size=0.3, random
 
 # 선택된 모델에 따라 모델 인스턴스 생성
 model_instance = None
-if st.session_state['regression_value'] == '선형회귀':
+if st.session_state['regression_value'] == 'Default':
     model_instance = LinearRegression()
 elif st.session_state['regression_value'] == 'LASSO':
     model_instance = Lasso(random_state=3174)
@@ -294,7 +309,7 @@ Y_train_pred = best_model.predict(X_train)
 Y_test_pred =  best_model.predict(X_test)
 
 # 평가지표
-if st.session_state['regression_value'] == '선형회귀':
+if st.session_state['regression_value'] == 'Default':
     st.write("Train Set의 r2 값 (1에 가까우면 좋다.): " , round(r2_score(Y_train,Y_train_pred),3))
     st.write("Test Set의 r2 값 (1에 가까우면 좋다.): " , round(r2_score(Y_test,Y_test_pred),3))
 elif st.session_state['regression_value'] == 'LASSO':
@@ -314,10 +329,21 @@ st.dataframe(df2)
 
 
 # 절편 확인 
-st.write("절편값:" , round(best_model['model'].intercept_,3))
+st.write("절편:" , round(best_model['model'].intercept_,3))
+
+st.info("※ 참고: 회귀계수 및 절편 값은 모델의 특성에 따라 달라질 수 있습니다.")
 
 st.divider()
-st.subheader('3. Target에 대한 최적파라미터값 도출')
+# 로고 Lottie와 타이틀 출력.
+col1, col2 = st.columns([1,3])
+with col1:
+    lottie = loadJSON('Success.json')
+    st_lottie(lottie, speed=1, loop=True, width=150, height=150)
+with col2:
+    ''
+    ''
+    st.subheader('3. 목표값에 대한 최적파라미터 도출')
+
 
 # 회귀모델 계수 및 절편 
 
@@ -388,10 +414,11 @@ st.write("**최적의 X 값 :**")
 optimal_features_dict = dict(zip(X.columns, optimal_x_original_scale.round(2)))
 st.write(optimal_features_dict)
 
-st.write(f"**예측 Y값:** {np.dot(optimal_x_scaled, coef) + intercept:.2f}")
 st.write(f"**목표 Y 값:** {Y_target}")
+st.write(f"**예측 Y값:** {np.dot(optimal_x_scaled, coef) + intercept:.2f}")
 #st.write(f"**최소화된 목적 함수 값 (MSE):** {result.fun:.2f}")
 
-st.info("참고: 최적화 결과는 초기값, 메서드, 제약조건, 그리고 모델의 특성에 따라 달라질 수 있습니다.")
+st.info("※ 참고: 최적화 결과는 초기값, 제약 조건, 모델의 특성에 따라 달라질 수 있습니다.")
 #st.info("특히 `optimal_x_original_scale`은 모델이 목표 Y를 달성하기 위해 '가장 적합하다고 판단한' 원본 스케일의 특성 조합입니다.")
 #st.info("`bounds`의 순서가 `X의 컬럼` 및 `coef`의 컬럼 순서와 정확히 일치하는지 다시 한번 확인해주세요.")
+
